@@ -2,11 +2,24 @@ name: Automatisation des tests DevSecOps
 on: push
 jobs:
   Dependances:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dependances
+   runs-on: ubuntu-latest
+   steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Installer pip-audit
         run: |
-          echo "ecrire ici le scrypt de contrôle des dépendances"
+          python3 -m pip install --upgrade pip pip-audit
+
+      - name: Contrôler les dépendances (pip-audit)
+        run: |
+          echo "🔍 Analyse des dépendances…"
+          pip-audit || { echo "Vulnérabilités détectées dans requirements.txt"; exit 1; }
+      
+      - name: Validation syntaxique du fichier requirements.txt
+        run: |
+          echo "🔎 Vérification syntaxique…"
+          pip install -r requirements.txt --dry-run
   Dockerfile:
     runs-on: ubuntu-latest
     needs: Dependances
