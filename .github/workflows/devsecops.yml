@@ -15,19 +15,29 @@ jobs:
         run: |
           echo "Analyse des dépendances…"
           pip-audit -r requirements.txt || true
-          echo "⚠️ Des vulnérabilités peuvent être présentes, mais ça continue"
+          echo "Des vulnérabilités peuvent être présentes, mais ça continue"
           
       - name: Validation syntaxique du fichier requirements.txt
         run: |
-          echo "🔎 Vérification syntaxique…"
+          echo "Vérification syntaxique…"
           pip install -r requirements.txt --dry-run
   Dockerfile:
     runs-on: ubuntu-latest
     needs: Dependances
     steps:
-      - name: Test Dockerfile
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Installer hadolint
         run: |
-          echo "ecrire ici le scrypt de contrôle du Dockerfile"
+          sudo apt-get update
+          sudo apt-get install -y hadolint
+
+      - name: Lint Dockerfile
+        run: |
+          echo "Analyse du Dockerfile"
+          hadolint Dockerfile || true
+          echo " Des problèmes peuvent être présents, mais le pipeline continue."
   Deploy:
     runs-on: ubuntu-latest
     needs: Dockerfile
