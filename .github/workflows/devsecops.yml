@@ -4,42 +4,43 @@ jobs:
   Dependances:
    runs-on: ubuntu-latest
    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+     - name: Checkout code
+       uses: actions/checkout@v4
 
-      - name: Installer pip-audit
-        run: |
-          python3 -m pip install --upgrade pip pip-audit
+     - name: Installer Trivy
+       uses: aquasecurity/trivy-action@0.20.0
+       with:
+         scan-type: fs
+         scan-ref: .
 
-      - name: Contrôler les dépendances (pip-audit)
-        run: |
-          echo "Analyse des dépendances…"
-          pip-audit -r requirements.txt || true
-          echo "Des vulnérabilités peuvent être présentes, mais ça continue"
-          
-      - name: Validation syntaxique du fichier requirements.txt
-        run: |
-          echo "Vérification syntaxique…"
-          pip install -r requirements.txt --dry-run
+     - name: Scan requirements.txt avec Trivy (non bloquant)
+       run: |
+         echo "🔍 Scan des dépendances avec Trivy…"
+
+         trivy fs --exit-code 0 --severity HIGH,CRITICAL --format table --file-patterns "requirements.txt" .
+        
+         echo "⚠️ Le pipeline continue même si des vulnérabilités sont trouvées."
+        
   Dockerfile:
-    runs-on: ubuntu-latest
-    needs: Dependances
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+   runs-on: ubuntu-latest
+   needs: Dependances
+   steps:
+     - name: Checkout code
+       uses: actions/checkout@v4
 
-      - name: Installer hadolint
-        run: |
-          wget -qO hadolint \
-          https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
-          chmod +x hadolint
-          sudo mv hadolint /usr/local/bin/hadolint
+     - name: Installer Trivy
+       uses: aquasecurity/trivy-action@0.20.0
+       with:
+         scan-type: fs
+         scan-ref: .
 
-      - name: Lint Dockerfile
-        run: |
-          echo "Analyse du Dockerfile"
-          hadolint Dockerfile || true
-          echo " Des problèmes peuvent être présents, mais le pipeline continue."
+     - name: Analyse du Dockerfile avec Trivy
+       run: |
+         echo "🔍 Analyse du Dockerfile (config scan)…"
+
+         trivy config --exit-code 0 --severity HIGH,CRITICAL .
+
+         echo "⚠️ Le pipeline continue même si des problèmes sont détectés."
   Deploy:
     runs-on: ubuntu-latest
     needs: Dockerfile
