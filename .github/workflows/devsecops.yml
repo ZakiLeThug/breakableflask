@@ -30,17 +30,15 @@ jobs:
      - name: Checkout code
        uses: actions/checkout@v4
 
-     - name: Installer Trivy
-       uses: aquasecurity/trivy-action@0.20.0
-       with:
-         scan-type: fs
-         scan-ref: .
-
-     - name: Analyse du Dockerfile avec Trivy
+     - name: Analyse du Dockerfile avec Trivy (non bloquant)
        run: |
          echo "🔍 Analyse du Dockerfile (config scan)…"
 
-         trivy config --exit-code 0 --severity HIGH,CRITICAL .
+         docker run --rm -v "$PWD":/app -w /app aquasec/trivy:latest config \
+          --severity HIGH,CRITICAL \
+          --exit-code 0 \
+          --format table \
+          /app
 
          echo "⚠️ Le pipeline continue même si des problèmes sont détectés."
   Deploy:
