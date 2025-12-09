@@ -9,21 +9,19 @@ jobs:
 
      - name: Scan requirements.txt avec Trivy (non bloquant)
        run: |
-        echo "🔍 Scan des dépendances avec Trivy (requirements.txt)…"
+         echo "🔍 Scan des dépendances avec Trivy (requirements.txt)…"
 
-        docker run --rm \
-        -v "$PWD":/app \
-        -w /app \
-        aquasec/trivy:latest fs \
-        --scanners vuln \
-        --pkg-types library
-        --file-patterns "pip:requirements\\.txt" \
-        --severity HIGH,CRITICAL \
-        --exit-code 0 \
-        --format table \
-        .
+         docker run --rm -v "$PWD":/app -w /app aquasec/trivy:latest fs \
+         --scanners vuln \
+         --pkg-types library \
+         --file-patterns 'pip:requirements\.txt' \
+         --severity HIGH,CRITICAL \
+         --exit-code 0 \
+         --format table \
+         /app
 
-        echo "⚠️ Le pipeline continue même si des vulnérabilités sont trouvées."
+         echo "⚠️ Le pipeline continue même si des vulnérabilités sont trouvées."
+
         
   Dockerfile:
    runs-on: ubuntu-latest
