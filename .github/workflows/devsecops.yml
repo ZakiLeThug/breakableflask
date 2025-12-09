@@ -12,15 +12,16 @@ jobs:
         echo "🔍 Scan des dépendances avec Trivy (requirements.txt)…"
 
         docker run --rm \
-          -v "$PWD":/app \
-          -w /app \
-          aquasec/trivy:latest fs \
-            --file-patterns "requirements.txt" \
-            --severity HIGH,CRITICAL \
-            --vuln-type library \
-            --exit-code 0 \
-            --format table \
-            .
+        -v "$PWD":/app \
+        -w /app \
+        aquasec/trivy:latest fs \
+        --scanners vuln \
+        --pkg-types pip \
+        --file-patterns "pip:requirements\\.txt" \
+        --severity HIGH,CRITICAL \
+        --exit-code 0 \
+        --format table \
+        .
 
         echo "⚠️ Le pipeline continue même si des vulnérabilités sont trouvées."
         
