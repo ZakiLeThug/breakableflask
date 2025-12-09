@@ -7,16 +7,22 @@ jobs:
      - name: Checkout code
        uses: actions/checkout@v4
 
-     - name: Scan des dépendances avec Trivy (non bloquant)
-       uses: aquasecurity/trivy-action@0.20.0
-       with:
-        scan-type: 'fs'          
-        scan-ref: '.'            
-        scanners: 'vuln'         
-        severity: 'HIGH,CRITICAL'
-        exit-code: '0'           
-        format: 'table'
-        vuln-type: 'library'     
+     - name: Scan requirements.txt avec Trivy (non bloquant)
+       run: |
+        echo "🔍 Scan des dépendances avec Trivy (requirements.txt)…"
+
+        docker run --rm \
+          -v "$PWD":/app \
+          -w /app \
+          aquasec/trivy:latest fs \
+            --file-patterns "requirements.txt" \
+            --severity HIGH,CRITICAL \
+            --vuln-type library \
+            --exit-code 0 \
+            --format table \
+            .
+
+        echo "⚠️ Le pipeline continue même si des vulnérabilités sont trouvées."
         
   Dockerfile:
    runs-on: ubuntu-latest
