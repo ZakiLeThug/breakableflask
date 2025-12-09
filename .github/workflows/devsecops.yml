@@ -16,7 +16,7 @@ jobs:
         -w /app \
         aquasec/trivy:latest fs \
         --scanners vuln \
-        --pkg-types pip \
+        --pkg-types library
         --file-patterns "pip:requirements\\.txt" \
         --severity HIGH,CRITICAL \
         --exit-code 0 \
